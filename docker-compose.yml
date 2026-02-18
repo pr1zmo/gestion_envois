@@ -1,0 +1,67 @@
+services:
+  nginx:
+    container_name: nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "443:443"
+    restart: always
+    networks:
+      - g_envoies
+    depends_on:
+      - backend
+    volumes:
+      - site_data:/var/www
+  
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - site_data:/var/www
+    restart: always
+    networks:
+      - g_envoies
+  
+  database:
+    container_name: database
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - g_envoies
+    restart: always
+
+  adminer:
+    container_name: adminer
+    build:
+      context: ./adminer
+      dockerfile: Dockerfile
+    networks:
+      - g_envoies
+    restart: always
+    depends_on:
+      - database
+
+networks:
+  g_envoies:
+    driver: bridge
+
+volumes:
+  db_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/zelbassa/data/gestion_db
+
+  site_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/zelbassa/data/gestion_envoies

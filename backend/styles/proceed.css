@@ -1,0 +1,15 @@
+.side-bar{
+    bottom: 0;
+    position: relative;
+    top: 0;
+
+}
+.didi{
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    background: black;
+    height: 150px;
+    width: 276px;
+    border-right: 2px solid white;
+}

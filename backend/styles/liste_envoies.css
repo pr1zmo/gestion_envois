@@ -1,0 +1,31 @@
+.main *{
+    color: white;
+}
+#list_envoies{
+    height: 600px;
+    width: 100%;
+    overflow: scroll;
+    overflow-x: hidden;
+    border-bottom: 65px solid transparent;
+    padding: 12px;
+}
+#selection{
+    color: black;
+}
+#selection *{
+    margin-right: 12px;
+}
+#selection button{
+    padding-block: 2px;
+}
+#today{
+    position: absolute;
+    left: 22px;
+    bottom: 12px;
+    font-weight: 700;
+    font-size: 1.4em;
+    color: black;
+    padding: 12px 26px;
+    border-radius: 50px;
+    background: #0dcaf0;
+}

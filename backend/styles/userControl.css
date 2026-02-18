@@ -1,0 +1,154 @@
+.add_user {
+  position: absolute;
+  top: 100px;
+  right: 20px;
+}
+
+
+table th,
+table td {
+  color: white;
+  border: 1px solid black;
+}
+
+.passwordd input {
+  pointer-events: none;
+  color: black;
+}
+
+.passwordd {
+  color: black;
+}
+
+.password {
+  color: black !important;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.password input {
+  height: 100%;
+}
+
+.password button {
+  border: none;
+  background-color: rgb(206, 206, 206);
+  /* aspect-ratio: 1/1; */
+  padding: 4px;
+  /* border-radius: 50%; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+table th {
+  text-align: center;
+}
+
+
+table a {
+  cursor: pointer;
+  padding: 12px;
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+  transition: .3s ease;
+  background-color: rgb(197, 197, 197);
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.a-weir {
+  border: 2px solid black;
+  background-color: white;
+  border-radius: 4px;
+  padding-inline: 3px;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #888;
+  width: 40%;
+  max-width: 600px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  animation-name: modalopen;
+  animation-duration: 0.5s;
+}
+
+@keyframes modalopen {
+  from {
+    opacity: 0
+  }
+
+  to {
+    opacity: 1
+  }
+}
+
+.buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.button {
+  margin-left: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.cancel {
+  background-color: #ccc;
+  color: #333;
+}
+
+.delete {
+  background-color: #ff3333;
+  color: #fff;
+}
+.td {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.td a,
+.td button {
+  display: block;
+  transition: .3s ease;
+  margin-inline: 4px;
+}
+.td a{
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}
+table a:hover,
+table button:hover {
+  transform: scale(1.1);
+}
+
+.container {
+  margin-top: 25px;
+}
+
+.container * {
+  color: white;
+}

@@ -1,0 +1,72 @@
+.user {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.user .welcome {
+  margin-right: 12px;
+}
+ul{
+  margin: 0;
+  padding: 0;
+}
+.active_side_bar{
+  background: rgba(255,255,255,0.4) !important;
+}
+
+.side-bar {
+  float: left;
+  border-right: 2px solid white;
+  background: black;
+  /*top: 0;*/
+  bottom: 0;
+  position: sticky;
+  width: 17.25rem;
+  overflow-y: scroll;
+  min-height: 100%;
+  max-height: 100vh;
+  overflow: hidden;
+}
+.side-bar-menu-item-link{
+  border-radius: 12px;
+  position: relative;
+  left: 0;
+  top: 0;
+  border: 2px solid white;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  padding: 12px 25px;
+  align-items: center;
+  justify-content: center;
+  transition: .2s ease;
+}
+.side-bar-menu-item-link:hover{
+  background: rgba(255, 255, 255, 0.23);
+}
+.side-bar-menu{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+ul li{
+  list-style: none;
+  /*padding: 12px 23px;*/
+  margin-bottom: 12px;
+}
+.side-bar-content{
+  width: 220px !important;
+  position: fixed;
+  /* Set the width of the child div to 100% to fill the parent div */
+  width: 100%;
+  /* Set the height of the child div to auto to fit the content */
+  height: 100%;
+  display: flex;
+  flex-direction: column !important;
+  /* Set the top and left positions to 0 to position the div in the top-left corner */
+  z-index: 99999999;
+  left: 20px;
+  top: 120px;
+}
