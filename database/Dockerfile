@@ -1,6 +1,6 @@
 FROM mysql:latest
 
-COPY init_db.sh /usr/local/bin/init-db.sh
+COPY init-db.sh /usr/local/bin/init-db.sh
 RUN chmod +x /usr/local/bin/init-db.sh
 
 RUN mkdir -p /var/run/mysqld && \
