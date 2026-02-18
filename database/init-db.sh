@@ -1,12 +1,30 @@
 #!/bin/bash
 # =============================================================================
-# init-db.sh — Initialise the "poste_maroc" MariaDB / MySQL database
+# init-db.sh — Initialise the "poste_maroc" MySQL database
+# Creates all tables, triggers, and seed data if the database doesn't exist.
 # Generated from a full analysis of every PHP file in backend/
 # =============================================================================
 set -e
 
+# ── Create and initialize MySQL directories ──────────────────────────────────
+mkdir -p /var/lib/mysql
+mkdir -p /var/run/mysqld
+chown -R mysql:mysql /var/lib/mysql
+chown -R mysql:mysql /var/run/mysqld
+chmod 755 /var/run/mysqld
+
+# Initialize the MySQL data directory using mysql_install_db or mysqld --initialize
+if [ ! -d /var/lib/mysql/mysql ]; then
+    if command -v mysql_install_db &> /dev/null; then
+        mysql_install_db --user=mysql --datadir=/var/lib/mysql --skip-test-db 2>&1 || true
+    else
+        mysqld --user=mysql --initialize-insecure --datadir=/var/lib/mysql 2>&1 || true
+    fi
+fi
+
 # ── Start MySQL in the background so we can run SQL statements ───────────────
-mysqld --user=mysql --datadir=/var/lib/mysql --skip-grant-tables &
+echo "Starting MySQL server..."
+mysqld --user=mysql --datadir=/var/lib/mysql --skip-grant-tables --bind-address=127.0.0.1 &
 MYSQLD_PID=$!
 
 # Wait until MySQL is ready
@@ -32,6 +50,10 @@ USE `poste_maroc`;
 
 -- ============================================================================
 -- 1. agency  (postal offices / branches)
+--    Referenced by: agent.code_agency, package.code_agency
+--    Used in: adduser.php (SELECT nom_agency, code_agency)
+--            proceed.php (SELECT * FROM agency — destination dropdown)
+--            userControl.php (SELECT nom_agency WHERE code_agency = ...)
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS `agency` (
     `code_agency`  INT           NOT NULL AUTO_INCREMENT,
@@ -41,6 +63,9 @@ CREATE TABLE IF NOT EXISTS `agency` (
 
 -- ============================================================================
 -- 2. admin  (back-office administrator accounts)
+--    Used in: controllers/admin.php
+--      SELECT * FROM admin WHERE username = :username AND password = :password
+--    Session keys: admin_id, username, password
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS `admin` (
     `id`        INT           NOT NULL AUTO_INCREMENT,
@@ -52,9 +77,13 @@ CREATE TABLE IF NOT EXISTS `admin` (
 
 -- ============================================================================
 -- 3. agent  (employees / front-desk agents)
---    status is an ENUM – PHP code uses SHOW COLUMNS to read its values.
---    Triggers enforce unique name / email and raise custom SQLSTATE codes
---    (45001 = duplicate name, 45002 = duplicate email, 45003 = both).
+--    status is an ENUM – PHP reads its allowed values with SHOW COLUMNS.
+--    Triggers enforce unique name / email and raise custom SQLSTATE codes:
+--      45001 = duplicate name
+--      45002 = duplicate email
+--      45003 = both duplicate
+--    Used in: controllers/login.php, adduser.php, editUser.php, deleteUser.php
+--            views/userControl.php, editUser.php, adduser.php
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS `agent` (
     `code_agent`   INT                              NOT NULL AUTO_INCREMENT,
@@ -135,11 +164,13 @@ DELIMITER ;
 
 -- ============================================================================
 -- 4. package  (shipments — colis & courier)
---    code_package is generated after insert in PHP:
---      colis   → 'CL' + zero-padded id + 'MA'
---      courier → 'CR' + zero-padded id + 'MA'
---    old_price stores the pre-discount price (0 when no discount applied).
---    fragile (+12 DH) and cache_en_delivery (+15 DH) are boolean flags.
+--    code_package is generated AFTER insert in PHP (controllers/proceed.php):
+--      colis   → 'CL' + zero-padded lastInsertId + 'MA'
+--      courier → 'CR' + zero-padded lastInsertId + 'MA'
+--    old_price stores pre-discount price (0 when no discount applied).
+--    A trigger adds +12 DH for fragile and +15 DH for cache_en_delivery.
+--    Used in: controllers/proceed.php (INSERT), controllers/filter_dates.php
+--            views/liste_envoie.php (SELECT), views/reciept.php (SELECT)
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS `package` (
     `id`                  INT                                      NOT NULL AUTO_INCREMENT,
@@ -190,17 +221,20 @@ DELIMITER ;
 
 -- ============================================================================
 -- 5. discount_table  (promotional discounts — percentage based)
---    status is derived from start_date / end_date vs CURDATE().
+--    status is a VIRTUAL generated column derived from start_date/end_date.
+--    Values: 'not yet started', 'ongoing', 'ended'
+--    Used in: controllers/addPromo.php (INSERT), controllers/deletePromo.php
+--            views/promoControl.php (SELECT *)
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS `discount_table` (
     `id`          INT            NOT NULL AUTO_INCREMENT,
-    `amount`      INT            NOT NULL COMMENT 'discount percentage 1-100',
+    `amount`      INT            NOT NULL COMMENT 'discount percentage (e.g. 10 = 10%)',
     `start_date`  DATE           NOT NULL,
     `end_date`    DATE           NOT NULL,
     `status`      VARCHAR(50)    GENERATED ALWAYS AS (
                       CASE
-                          WHEN CURDATE() < `start_date`               THEN 'not yet started'
-                          WHEN CURDATE() BETWEEN `start_date` AND `end_date` THEN 'ongoing'
+                          WHEN CURDATE() < `start_date`                       THEN 'not yet started'
+                          WHEN CURDATE() BETWEEN `start_date` AND `end_date`  THEN 'ongoing'
                           ELSE 'ended'
                       END
                   ) VIRTUAL,
@@ -210,6 +244,8 @@ CREATE TABLE IF NOT EXISTS `discount_table` (
 -- ============================================================================
 -- 6. tarif_par_produit_colis  (price grid for colis by weight range in KG)
 --    Queried as: WHERE `from` < :weight AND `to` >= :weight
+--    Used in: views/dashboard.php, controllers/tarifControl_colis.php
+--            components/tarifControl_colis.php
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS `tarif_par_produit_colis` (
     `id`     INT            NOT NULL AUTO_INCREMENT,
@@ -222,6 +258,8 @@ CREATE TABLE IF NOT EXISTS `tarif_par_produit_colis` (
 -- ============================================================================
 -- 7. tarif_par_produit_courier  (price grid for courier by weight range in KG)
 --    Queried as: WHERE `from` < :weight AND `to` >= :weight
+--    Used in: views/dashboard.php, controllers/tarifControl_courier.php
+--            components/tarifControl_courier.php
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS `tarif_par_produit_courier` (
     `id`     INT            NOT NULL AUTO_INCREMENT,
@@ -237,18 +275,18 @@ CREATE TABLE IF NOT EXISTS `tarif_par_produit_courier` (
 
 -- Agencies (Moroccan postal offices)
 INSERT IGNORE INTO `agency` (`code_agency`, `nom_agency`) VALUES
-    (1, 'Rabat'),
-    (2, 'Casablanca'),
-    (3, 'Marrakech'),
-    (4, 'Fes'),
-    (5, 'Tanger'),
-    (6, 'Agadir'),
-    (7, 'Oujda'),
-    (8, 'Meknes'),
-    (9, 'Kenitra'),
+    (1,  'Rabat'),
+    (2,  'Casablanca'),
+    (3,  'Marrakech'),
+    (4,  'Fes'),
+    (5,  'Tanger'),
+    (6,  'Agadir'),
+    (7,  'Oujda'),
+    (8,  'Meknes'),
+    (9,  'Kenitra'),
     (10, 'Tetouan');
 
--- Default admin account
+-- Default admin account (matches controllers/admin.php login)
 INSERT IGNORE INTO `admin` (`id`, `username`, `password`) VALUES
     (1, 'admin', 'admin');
 
@@ -272,7 +310,6 @@ INSERT IGNORE INTO `tarif_par_produit_courier` (`id`, `from`, `to`, `price`) VAL
     (6, 0.500, 1.000, 45.00),
     (7, 1.000, 2.000, 60.00);
 
--- Grant full privileges (matches conn.php: root with no password)
 FLUSH PRIVILEGES;
 
 EOSQL
@@ -284,4 +321,4 @@ mysqladmin shutdown 2>/dev/null || true
 wait "$MYSQLD_PID" 2>/dev/null || true
 
 echo "Starting MySQL in foreground..."
-exec mysqld --user=mysql
+exec mysqld --user=mysql --datadir=/var/lib/mysql --bind-address=127.0.0.1
