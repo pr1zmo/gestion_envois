@@ -6,6 +6,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "443:443"
+      - "8081:8081"
     restart: always
     networks:
       - g_envoies
@@ -57,11 +58,11 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/zelbassa/data/gestion_db
+      device: /home/prizmo/data/gestion_db
 
   site_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/zelbassa/data/gestion_envoies
+      device: /home/prizmo/data/gestion_envoies

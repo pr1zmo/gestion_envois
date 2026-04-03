@@ -48,6 +48,12 @@ CREATE DATABASE IF NOT EXISTS `poste_maroc`
 
 USE `poste_maroc`;
 
+-- Allow root to connect from any host (important for Docker)
+FLUSH PRIVILEGES;
+CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
 -- ============================================================================
 -- 1. agency  (postal offices / branches)
 --    Referenced by: agent.code_agency, package.code_agency
@@ -231,13 +237,7 @@ CREATE TABLE IF NOT EXISTS `discount_table` (
     `amount`      INT            NOT NULL COMMENT 'discount percentage (e.g. 10 = 10%)',
     `start_date`  DATE           NOT NULL,
     `end_date`    DATE           NOT NULL,
-    `status`      VARCHAR(50)    GENERATED ALWAYS AS (
-                      CASE
-                          WHEN CURDATE() < `start_date`                       THEN 'not yet started'
-                          WHEN CURDATE() BETWEEN `start_date` AND `end_date`  THEN 'ongoing'
-                          ELSE 'ended'
-                      END
-                  ) VIRTUAL,
+    `status`      VARCHAR(50)    DEFAULT 'not yet started',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -319,6 +319,9 @@ echo "Database 'poste_maroc' initialised successfully."
 # ── Stop the background mysqld and restart it in the foreground ──────────────
 mysqladmin shutdown 2>/dev/null || true
 wait "$MYSQLD_PID" 2>/dev/null || true
+# Clean up stale socket file to prevent "Another process using socket" error
+rm -f /var/run/mysqld/mysqld.sock /var/run/mysqld/mysqld.sock.lock
+sleep 1
 
 echo "Starting MySQL in foreground..."
-exec mysqld --user=mysql --datadir=/var/lib/mysql --bind-address=127.0.0.1
+exec mysqld --user=mysql --datadir=/var/lib/mysql --bind-address=0.0.0.0 --port=3306

@@ -1,9 +1,10 @@
 FROM php:8.2-fpm
 
-# Install PHP-FPM and MySQL extension
+# Install system dependencies and PHP extensions
 RUN apt-get update && \
     apt-get install -y \
     wget && \
+    docker-php-ext-install mysqli && \
     rm -rf /var/lib/apt/lists/*
 
 # Create directory for Adminer
@@ -16,11 +17,5 @@ RUN wget -O /var/www/adminer/index.php \
 # Set permissions
 RUN chown -R www-data:www-data /var/www/adminer
 
-# Configure PHP-FPM to listen on port 9000
-RUN sed -i 's|listen = /run/php/php8.2-fpm.sock|listen = 9000|g' /etc/php/8.2/fpm/pool.d/www.conf
-
 # Expose PHP-FPM port
 EXPOSE 9000
-
-# Start PHP-FPM in foreground
-CMD ["php-fpm8.2", "-F"]

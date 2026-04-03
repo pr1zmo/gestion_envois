@@ -1,5 +1,5 @@
 <?php 
-$db_host = "mariadb";
+$db_host = "database";
 $db_name = "poste_maroc";
 $db_user = "root";
 $db_pass = "";
