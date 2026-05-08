@@ -1,9 +1,10 @@
 FROM php:8.2-fpm
 
-# Install PHP-FPM and MySQL extension
+# Install system dependencies and PHP extensions
 RUN apt-get update && \
     apt-get install -y \
     wget && \
+    docker-php-ext-install mysqli && \
     rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-install pdo pdo_mysql mysqli
@@ -23,6 +24,3 @@ CMD ["php-fpm"]
 
 # Expose PHP-FPM port
 EXPOSE 9000
-
-# Start PHP-FPM in foreground
-CMD ["php-fpm8.2", "-F"]

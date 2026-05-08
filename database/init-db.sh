@@ -48,6 +48,12 @@ CREATE DATABASE IF NOT EXISTS `poste_maroc`
 
 USE `poste_maroc`;
 
+-- Allow root to connect from any host (important for Docker)
+FLUSH PRIVILEGES;
+CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY '';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
 -- ============================================================================
 -- 1. agency  (postal offices / branches)
 --    Referenced by: agent.code_agency, package.code_agency
