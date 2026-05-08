@@ -231,13 +231,7 @@ CREATE TABLE IF NOT EXISTS `discount_table` (
     `amount`      INT            NOT NULL COMMENT 'discount percentage (e.g. 10 = 10%)',
     `start_date`  DATE           NOT NULL,
     `end_date`    DATE           NOT NULL,
-    `status`      VARCHAR(50)    GENERATED ALWAYS AS (
-                      CASE
-                          WHEN CURDATE() < `start_date`                       THEN 'not yet started'
-                          WHEN CURDATE() BETWEEN `start_date` AND `end_date`  THEN 'ongoing'
-                          ELSE 'ended'
-                      END
-                  ) VIRTUAL,
+    `status`      VARCHAR(50)    NOT NULL DEFAULT 'ongoing',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -314,11 +308,16 @@ FLUSH PRIVILEGES;
 
 EOSQL
 
+mysql --user=root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root'; CREATE USER IF NOT EXISTS 'root'@'%' IDENTIFIED BY 'root'; ALTER USER 'root'@'%' IDENTIFIED BY 'root'; GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;" 2>/dev/null || true
+
 echo "Database 'poste_maroc' initialised successfully."
 
 # ── Stop the background mysqld and restart it in the foreground ──────────────
-mysqladmin shutdown 2>/dev/null || true
+mysqladmin --user=root --password=root shutdown 2>/dev/null || mysqladmin shutdown 2>/dev/null || kill "$MYSQLD_PID" || true
 wait "$MYSQLD_PID" 2>/dev/null || true
 
+# Wait an extra second to ensure socket lock files are released
+sleep 2
+
 echo "Starting MySQL in foreground..."
-exec mysqld --user=mysql --datadir=/var/lib/mysql --bind-address=127.0.0.1
+exec mysqld --user=mysql --datadir=/var/lib/mysql --bind-address=0.0.0.0

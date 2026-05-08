@@ -5,7 +5,8 @@ services:
       context: ./nginx
       dockerfile: Dockerfile
     ports:
-      - "443:443"
+      - "8443:443"
+      - "8081:8081"
     restart: always
     networks:
       - g_envoies
@@ -41,6 +42,7 @@ services:
     build:
       context: ./adminer
       dockerfile: Dockerfile
+    command: php-fpm
     networks:
       - g_envoies
     restart: always

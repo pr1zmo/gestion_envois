@@ -6,6 +6,8 @@ RUN apt-get update && \
     wget && \
     rm -rf /var/lib/apt/lists/*
 
+RUN docker-php-ext-install pdo pdo_mysql mysqli
+
 # Create directory for Adminer
 RUN mkdir -p /var/www/adminer
 
@@ -16,8 +18,8 @@ RUN wget -O /var/www/adminer/index.php \
 # Set permissions
 RUN chown -R www-data:www-data /var/www/adminer
 
-# Configure PHP-FPM to listen on port 9000
-RUN sed -i 's|listen = /run/php/php8.2-fpm.sock|listen = 9000|g' /etc/php/8.2/fpm/pool.d/www.conf
+# Set proper start command
+CMD ["php-fpm"]
 
 # Expose PHP-FPM port
 EXPOSE 9000

@@ -1,6 +1,6 @@
 <?php 
-require("../connection/conn.php");
 session_start();
+require("../connection/conn.php");
 if(!isset($_POST['username'])){
   header("Location: ../views/index.php");
 }

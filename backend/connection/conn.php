@@ -1,8 +1,8 @@
 <?php 
-$db_host = "mariadb";
+$db_host = "database";
 $db_name = "poste_maroc";
 $db_user = "root";
-$db_pass = "";
+$db_pass = "root";
 
 // create a PDO object
 try {
@@ -10,6 +10,6 @@ try {
     // set the PDO error mode to exception
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch(PDOException $e) {
-    echo "Connection failed: " . $e->getMessage();
+    die("Connection failed: " . $e->getMessage());
 }
 ?>
