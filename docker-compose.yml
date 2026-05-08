@@ -55,15 +55,10 @@ networks:
 
 volumes:
   db_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/prizmo/data/gestion_db
 
   site_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/prizmo/data/gestion_envoies
+      device: ./backend

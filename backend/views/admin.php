@@ -36,34 +36,34 @@ error_reporting(E_ALL);
     </div>
 </div>
 <div class="form-body">
-        <div class="row">
-            <div class="form-holder">
-                <div class="form-content">
-                    <div class="form-items">
-                        <h3>ADMIN AUTHENTICATION</h3>
-                        <p>Fill in the data below.</p>
-                        <form class="requires-validation" action="../controllers/admin.php" method="post">
-                            <div class="col-md-12">
-                                <input onchange="check()" class="text-dark form-control" type="text" name="username" placeholder="username" required>
-                            </div>
-                           <div class="col-md-12">
-                              <input onchange="check()" class="text-dark form-control" type="password" name="password" placeholder="Password" required>
-                           </div>
-                           <div>
-                            <?php if(isset($_SESSION['error'])){
-                              echo '<div class="text-danger pt-2">'.$_SESSION['error'] . '</div>';
-                              unset($_SESSION['error']);
-                            } ?>
-                           </div>
-                            <div class="form-button mt-3">
-                                <button id="submit" type="submit" class="btn btn-primary bg-primary">Login</button>
-                            </div>
-                        </form>
-                    </div>
+    <div class="row">
+        <div class="form-holder">
+            <div class="form-content">
+                <div class="form-items">
+                    <h3>ADMIN AUTHENTICATION</h3>
+                    <p>Fill in the data below.</p>
+                    <form class="requires-validation" action="../controllers/admin.php" method="post">
+                        <div class="col-md-12">
+                            <input onchange="check()" class="text-dark form-control" type="text" name="username" placeholder="username" required>
+                        </div>
+                        <div class="col-md-12">
+                          <input onchange="check()" class="text-dark form-control" type="password" name="password" placeholder="Password" required>
+                        </div>
+                        <div>
+                        <?php if(isset($_SESSION['error'])){
+                          echo '<div class="text-danger pt-2">'.$_SESSION['error'] . '</div>';
+                          unset($_SESSION['error']);
+                        } ?>
+                        </div>
+                        <div class="form-button mt-3">
+                            <button id="submit" type="submit" class="btn btn-primary bg-primary">Login</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
 </body>
 <script>
